@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard — CampusFix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="app-shell">
+  <div class="sidebar-overlay"></div>
+
+  <aside class="sidebar">
+    <a href="{{ url_for('home') }}" class="logo"><span class="logo-mark">CF</span> CampusFix</a>
+    <nav class="side-nav">
+      <a href="{{ url_for('admin_dashboard') }}" class="side-link active"><span class="icon">🏠</span> Dashboard</a>
+      <a href="{{ url_for('admin_complaints') }}" class="side-link"><span class="icon">📋</span> All Complaints</a>
+      <a href="{{ url_for('admin_complaints', status='pending') }}" class="side-link"><span class="icon">⏳</span> Pending</a>
+      <a href="{{ url_for('admin_complaints', status='in-progress') }}" class="side-link"><span class="icon">🔧</span> In Progress</a>
+      <a href="{{ url_for('admin_complaints', status='resolved') }}" class="side-link"><span class="icon">✅</span> Resolved</a>
+      <div class="side-divider"></div>
+      <a href="{{ url_for('logout') }}" class="side-link"><span class="icon">🚪</span> Logout</a>
+    </nav>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="hamburger" aria-label="Open menu">☰</button>
+        <h1>Admin Dashboard</h1>
+      </div>
+      <div class="topbar-right">
+        <a href="{{ url_for('profile') }}" class="topbar-profile">
+          <div class="avatar">{{ user.initials }}</div>
+          <div><div class="name">{{ user.full_name }}</div><div class="role">Campus Admin</div></div>
+        </a>
+      </div>
+    </header>
+
+    <div class="page-body">
+      {% include "_flash.html" %}
+
+      <!-- ============ STAT CARDS ============ -->
+      <div class="grid grid-4" style="margin-bottom: var(--space-6)">
+        <div class="card stat-card">
+          <div class="stat-card-top"><div class="stat-icon blue">📋</div></div>
+          <div class="stat-num">{{ total }}</div>
+          <div class="stat-name">Total Issues</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-card-top"><div class="stat-icon amber">⏳</div></div>
+          <div class="stat-num">{{ pending }}</div>
+          <div class="stat-name">Pending</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-card-top"><div class="stat-icon red">🚨</div></div>
+          <div class="stat-num">{{ high_priority }}</div>
+          <div class="stat-name">High Priority</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-card-top"><div class="stat-icon cyan">🔧</div></div>
+          <div class="stat-num">{{ in_progress }}</div>
+          <div class="stat-name">In Progress</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-card-top"><div class="stat-icon green">✅</div></div>
+          <div class="stat-num">{{ resolved }}</div>
+          <div class="stat-name">Resolved</div>
+        </div>
+      </div>
+
+      <div class="grid" style="grid-template-columns: 1.3fr 1fr; align-items:start; margin-bottom: var(--space-6)">
+        <!-- ============ PRIORITY ISSUES ============ -->
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Priority Issues</h3>
+            <a href="{{ url_for('admin_complaints', priority='critical') }}" class="btn btn-ghost btn-sm">View All →</a>
+          </div>
+          {% if priority_issues %}
+          <div class="priority-list">
+            {% for c in priority_issues %}
+            <a href="{{ url_for('admin_complaint_details', complaint_id=c.id) }}" class="priority-item" style="text-decoration:none">
+              <div><div class="p-title">{{ c.title }}</div><div class="p-meta">{{ c.complaint_id }} · {{ c.category }} · Submitted {{ c.created_at.strftime('%d %b') }}</div></div>
+              <span class="badge badge-{{ priority_badge_class(c.priority) }}">{{ c.priority }}</span>
+            </a>
+            {% endfor %}
+          </div>
+          {% else %}
+          <p class="text-muted" style="margin:0">No high-priority issues right now. 🎉</p>
+          {% endif %}
+        </div>
+
+        <!-- ============ ANALYTICS: BY STATUS ============ -->
+        <div class="panel">
+          <div class="panel-head"><h3>Complaints by Status</h3></div>
+          <div class="bar-chart">
+            {% set status_pct = {
+              'Pending': (pending / total * 100) | round if total else 0,
+              'In Progress': (in_progress / total * 100) | round if total else 0,
+              'Resolved': (resolved / total * 100) | round if total else 0,
+              'Rejected': (rejected / total * 100) | round if total else 0
+            } %}
+            <div class="bar-row"><span class="bar-label">Pending</span><div class="bar-track"><div class="bar-fill warn" style="width:{{ status_pct['Pending'] }}%"></div></div><span class="bar-value">{{ status_pct['Pending'] }}%</span></div>
+            <div class="bar-row"><span class="bar-label">In Progress</span><div class="bar-track"><div class="bar-fill" style="width:{{ status_pct['In Progress'] }}%"></div></div><span class="bar-value">{{ status_pct['In Progress'] }}%</span></div>
+            <div class="bar-row"><span class="bar-label">Resolved</span><div class="bar-track"><div class="bar-fill success" style="width:{{ status_pct['Resolved'] }}%"></div></div><span class="bar-value">{{ status_pct['Resolved'] }}%</span></div>
+            <div class="bar-row"><span class="bar-label">Rejected</span><div class="bar-track"><div class="bar-fill danger" style="width:{{ status_pct['Rejected'] }}%"></div></div><span class="bar-value">{{ status_pct['Rejected'] }}%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-2">
+        <!-- ============ ANALYTICS: BY CATEGORY ============ -->
+        <div class="panel">
+          <div class="panel-head"><h3>Complaints by Category</h3></div>
+          {% if by_category %}
+          <div class="bar-chart">
+            {% for row in by_category %}
+            <div class="bar-row"><span class="bar-label">{{ row.label }}</span><div class="bar-track"><div class="bar-fill {{ 'accent' if loop.index is odd }}" style="width:{{ row.pct }}%"></div></div><span class="bar-value">{{ row.pct }}%</span></div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <p class="text-muted" style="margin:0">No complaints reported yet.</p>
+          {% endif %}
+        </div>
+
+        <!-- ============ ANALYTICS: BY LOCATION ============ -->
+        <div class="panel">
+          <div class="panel-head"><h3>Complaints by Location</h3></div>
+          {% if by_location %}
+          <div class="bar-chart">
+            {% for row in by_location[:6] %}
+            <div class="bar-row"><span class="bar-label">{{ row.label }}</span><div class="bar-track"><div class="bar-fill {{ 'accent' if loop.index is odd }}" style="width:{{ row.pct }}%"></div></div><span class="bar-value">{{ row.pct }}%</span></div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <p class="text-muted" style="margin:0">No complaints reported yet.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — CampusFix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="app-shell">
+  <div class="sidebar-overlay"></div>
+
+  <aside class="sidebar">
+    <a href="{{ url_for('home') }}" class="logo"><span class="logo-mark">CF</span> CampusFix</a>
+    <nav class="side-nav">
+      <a href="{{ url_for('student_dashboard') }}" class="side-link active"><span class="icon">🏠</span> Dashboard</a>
+      <a href="{{ url_for('report') }}" class="side-link"><span class="icon">📝</span> Report Problem</a>
+      <a href="{{ url_for('my_complaints') }}" class="side-link"><span class="icon">📋</span> My Complaints</a>
+      <a href="{{ url_for('notifications') }}" class="side-link">
+        <span class="icon">🔔</span> Notifications
+        {% if unread_count > 0 %}<span class="notif-badge">{{ unread_count }}</span>{% endif %}
+      </a>
+      <a href="{{ url_for('profile') }}" class="side-link"><span class="icon">👤</span> Profile</a>
+      <div class="side-divider"></div>
+      <a href="{{ url_for('logout') }}" class="side-link"><span class="icon">🚪</span> Logout</a>
+    </nav>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="hamburger" aria-label="Open menu">☰</button>
+        <h1>Dashboard</h1>
+      </div>
+      <div class="topbar-right">
+        <a href="{{ url_for('notifications') }}" class="icon-btn">🔔{% if unread_count > 0 %}<span class="dot-badge"></span>{% endif %}</a>
+        <a href="{{ url_for('profile') }}" class="topbar-profile">
+          <div class="avatar">{{ user.initials }}</div>
+          <div><div class="name">{{ user.full_name }}</div><div class="role">B.Tech {{ user.branch }} · {{ user.year }}</div></div>
+        </a>
+      </div>
+    </header>
+
+    <div class="page-body">
+      {% include "_flash.html" %}
+
+      <div class="welcome-banner">
+        <div>
+          <h2>Good day, {{ user.full_name.split(' ')[0] }}!</h2>
+          <p>
+            {% if in_progress > 0 %}
+              You have {{ in_progress }} complaint{{ 's' if in_progress != 1 else '' }} currently in progress.
+            {% elif total == 0 %}
+              You haven't reported any problems yet.
+            {% else %}
+              All your complaints are up to date.
+            {% endif %}
+          </p>
+        </div>
+        <a href="{{ url_for('report') }}" class="btn btn-primary">+ Report New Problem</a>
+      </div>
+
+      <!-- ============ STAT CARDS ============ -->
+      <div class="grid grid-4" style="margin-bottom: var(--space-6)">
+        <div class="card stat-card">
+          <div class="stat-card-top"><div class="stat-icon blue">📋</div></div>
+          <div class="stat-num">{{ total }}</div>
+          <div class="stat-name">Total Complaints</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-card-top"><div class="stat-icon amber">⏳</div></div>
+          <div class="stat-num">{{ pending }}</div>
+          <div class="stat-name">Pending</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-card-top"><div class="stat-icon cyan">🔧</div></div>
+          <div class="stat-num">{{ in_progress }}</div>
+          <div class="stat-name">In Progress</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-card-top"><div class="stat-icon green">✅</div></div>
+          <div class="stat-num">{{ resolved }}</div>
+          <div class="stat-name">Resolved</div>
+        </div>
+      </div>
+
+      <!-- ============ RECENT COMPLAINTS ============ -->
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Recent Complaints</h3>
+          <a href="{{ url_for('my_complaints') }}" class="btn btn-ghost btn-sm">View All →</a>
+        </div>
+
+        {% if recent_complaints %}
+        <div class="grid grid-2">
+          {% for c in recent_complaints %}
+          <div class="card complaint-card">
+            <div class="complaint-card-top">
+              <div>
+                <h4>{{ c.title }}</h4>
+                <span class="cell-sub">{{ c.complaint_id }} • {{ c.category }}</span>
+              </div>
+              <span class="badge badge-{{ status_badge_class(c.status) }}">{{ c.status }}</span>
+            </div>
+            <div class="complaint-meta">
+              <span>📍 {{ c.location }}{% if c.room_number %}, Room {{ c.room_number }}{% endif %}</span>
+              <span><span class="badge badge-{{ priority_badge_class(c.priority) }}">{{ c.priority }}</span></span>
+              <span>🗓️ {{ c.created_at.strftime('%d %b %Y') }}</span>
+            </div>
+            <a class="btn btn-outline btn-sm" href="{{ url_for('complaint_details', complaint_id=c.id) }}">View Details</a>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+          <span class="emoji">🗂️</span>
+          <p>No complaints yet. Report your first campus problem to get started.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

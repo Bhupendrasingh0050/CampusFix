@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile — CampusFix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="app-shell">
+  <div class="sidebar-overlay"></div>
+
+  <aside class="sidebar">
+    <a href="{{ url_for('home') }}" class="logo"><span class="logo-mark">CF</span> CampusFix</a>
+    <nav class="side-nav">
+      {% if user.role == 'admin' %}
+      <a href="{{ url_for('admin_dashboard') }}" class="side-link"><span class="icon">🏠</span> Dashboard</a>
+      <a href="{{ url_for('admin_complaints') }}" class="side-link"><span class="icon">📋</span> All Complaints</a>
+      {% else %}
+      <a href="{{ url_for('student_dashboard') }}" class="side-link"><span class="icon">🏠</span> Dashboard</a>
+      <a href="{{ url_for('report') }}" class="side-link"><span class="icon">📝</span> Report Problem</a>
+      <a href="{{ url_for('my_complaints') }}" class="side-link"><span class="icon">📋</span> My Complaints</a>
+      <a href="{{ url_for('notifications') }}" class="side-link">
+        <span class="icon">🔔</span> Notifications
+        {% if unread_count > 0 %}<span class="notif-badge">{{ unread_count }}</span>{% endif %}
+      </a>
+      {% endif %}
+      <a href="{{ url_for('profile') }}" class="side-link active"><span class="icon">👤</span> Profile</a>
+      <div class="side-divider"></div>
+      <a href="{{ url_for('logout') }}" class="side-link"><span class="icon">🚪</span> Logout</a>
+    </nav>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="hamburger" aria-label="Open menu">☰</button>
+        <h1>Profile</h1>
+      </div>
+      <div class="topbar-right">
+        <a href="{{ url_for('profile') }}" class="topbar-profile">
+          <div class="avatar">{{ user.initials }}</div>
+          <div><div class="name">{{ user.full_name }}</div><div class="role">{{ 'Campus Admin' if user.role == 'admin' else 'Student' }}</div></div>
+        </a>
+      </div>
+    </header>
+
+    <div class="page-body">
+      {% include "_flash.html" %}
+
+      <div class="panel" style="max-width: 640px; margin: 0 auto;">
+        <div class="profile-header">
+          <div class="avatar-lg">{{ user.initials }}</div>
+          <div>
+            <h3 style="margin-bottom:2px">{{ user.full_name }}</h3>
+            <p style="margin:0">
+              {% if user.role == 'admin' %}Campus Administrator{% else %}B.Tech {{ user.branch }} · {{ user.year }}{% endif %}
+            </p>
+          </div>
+        </div>
+
+        <form id="profile-form" method="POST" action="{{ url_for('profile') }}" data-validate novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="p-name">Full Name</label>
+              <input type="text" id="p-name" name="full_name" value="{{ user.full_name }}" required>
+              <span class="field-error">Please enter your name.</span>
+            </div>
+            <div class="form-group">
+              <label for="p-email">College Email</label>
+              <input type="email" id="p-email" value="{{ user.email }}" readonly>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="p-student-id">Student ID</label>
+              <input type="text" id="p-student-id" value="{{ user.student_id or 'N/A' }}" readonly>
+            </div>
+            <div class="form-group">
+              <label for="p-branch">Branch</label>
+              <select id="p-branch" name="branch">
+                {% for b in ["CSE (AI)", "CSE", "ECE", "Mechanical", "Civil", "Administration", "Other"] %}
+                <option {{ 'selected' if user.branch == b }}>{{ b }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" style="max-width: 200px;">
+            <label for="p-year">Year</label>
+            <select id="p-year" name="year">
+              {% for y in ["1st Year", "2nd Year", "3rd Year", "4th Year", "N/A"] %}
+              <option {{ 'selected' if user.year == y }}>{{ y }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div style="display:flex; gap: var(--space-3); margin-top: var(--space-6)">
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

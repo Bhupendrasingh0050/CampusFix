@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — CampusFix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="auth-wrap">
+  <!-- Left branding panel -->
+  <div class="auth-side">
+    <a href="{{ url_for('home') }}" class="logo"><span class="logo-mark">CF</span> CampusFix</a>
+    <blockquote>
+      "Report your problem here after login"
+      <cite>— We'll work to get it resolved.</cite>
+    </blockquote>
+  </div>
+
+  <!-- Right form panel -->
+  <div class="auth-form-side">
+    <div class="auth-box">
+      <h2>Welcome back</h2>
+      <p class="text-muted">Login to report and track your campus complaints.</p>
+
+      {% include "_flash.html" %}
+
+      <form id="login-form" method="POST" action="{{ url_for('login') }}" data-validate novalidate>
+        <div class="form-group">
+          <label for="email">College Email</label>
+          <input type="email" id="email" name="email" placeholder="you@college.edu" required>
+          <span class="field-error">Please enter your email address.</span>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="password-field">
+            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            <button type="button" class="password-toggle">Show</button>
+          </div>
+          <span class="field-error">Please enter your password.</span>
+        </div>
+
+        <div class="form-foot-row">
+          <label class="checkbox-row"><input type="checkbox" name="remember"> Remember me</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Login</button>
+      </form>
+
+      <p class="auth-footer-link">Don't have an account? <a href="{{ url_for('register') }}">Create Account</a></p>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

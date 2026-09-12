@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>All Complaints — CampusFix Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"></head>
+<body>
+
+<div class="app-shell">
+  <div class="sidebar-overlay"></div>
+
+  <aside class="sidebar">
+    <a href="{{ url_for('home') }}" class="logo"><span class="logo-mark">CF</span> CampusFix</a>
+    <nav class="side-nav">
+      <a href="{{ url_for('admin_dashboard') }}" class="side-link"><span class="icon">🏠</span> Dashboard</a>
+      <a href="{{ url_for('admin_complaints') }}" class="side-link active"><span class="icon">📋</span> All Complaints</a>
+      <a href="{{ url_for('admin_complaints', status='pending') }}" class="side-link"><span class="icon">⏳</span> Pending</a>
+      <a href="{{ url_for('admin_complaints', status='in-progress') }}" class="side-link"><span class="icon">🔧</span> In Progress</a>
+      <a href="{{ url_for('admin_complaints', status='resolved') }}" class="side-link"><span class="icon">✅</span> Resolved</a>
+      <div class="side-divider"></div>
+      <a href="{{ url_for('logout') }}" class="side-link"><span class="icon">🚪</span> Logout</a>
+    </nav>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="hamburger" aria-label="Open menu">☰</button>
+        <h1>All Complaints</h1>
+      </div>
+      <div class="topbar-right">
+        <a href="{{ url_for('profile') }}" class="topbar-profile">
+          <div class="avatar">{{ user.initials }}</div>
+          <div><div class="name">{{ user.full_name }}</div><div class="role">Campus Admin</div></div>
+        </a>
+      </div>
+    </header>
+
+    <div class="page-body">
+      {% include "_flash.html" %}
+
+      <div class="panel">
+        <div class="filters-bar">
+          <div class="search-box"><span class="icon">🔍</span><input type="text" placeholder="Search by student, title or ID..." data-filter-search></div>
+          <select data-filter-category>
+            <option value="all">All Categories</option>
+            <option value="Internet/Wi-Fi">Internet/Wi-Fi</option>
+            <option value="Electricity">Electricity</option>
+            <option value="Water">Water</option>
+            <option value="Classroom">Classroom</option>
+            <option value="Laboratory">Laboratory</option>
+            <option value="Furniture">Furniture</option>
+            <option value="Cleanliness">Cleanliness</option>
+            <option value="Other">Other</option>
+          </select>
+          <select data-filter-department>
+            <option value="all">All Departments</option>
+            {% for dept in departments %}
+            <option value="{{ dept.name }}">{{ dept.name }}</option>
+            {% endfor %}
+          </select>
+          <select data-filter-priority>
+            <option value="all">All Priorities</option>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+            <option value="critical">Critical</option>
+          </select>
+          <select data-filter-status>
+            <option value="all">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="in-progress">In Progress</option>
+            <option value="resolved">Resolved</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
+
+        {% if complaints %}
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Student</th>
+                <th>Problem</th>
+                <th>Category</th>
+                <th>Department</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody data-filter-target>
+              {% for c in complaints %}
+              <tr data-row
+                  data-id="{{ c.complaint_id }}"
+                  data-title="{{ c.title }} {{ c.user.full_name }}"
+                  data-category="{{ c.category }}"
+                  data-department="{{ c.department.name if c.department else '' }}"
+                  data-status="{{ status_data_slug(c.status) }}"
+                  data-priority="{{ priority_badge_class(c.priority) }}">
+                <td class="cell-id">{{ c.complaint_id }}</td>
+                <td>{{ c.user.full_name }}</td>
+                <td class="cell-primary">{{ c.title }}</td>
+                <td>{{ c.category }}</td>
+                <td>{{ c.department.name if c.department else '—' }}</td>
+                <td><span class="badge badge-{{ priority_badge_class(c.priority) }}">{{ c.priority }}</span></td>
+                <td><span class="badge badge-{{ status_badge_class(c.status) }}">{{ c.status }}</span></td>
+                <td class="cell-sub">{{ c.created_at.strftime('%d %b %Y') }}</td>
+                <td class="row-actions">
+                  <a class="btn btn-outline btn-sm" href="{{ url_for('admin_complaint_details', complaint_id=c.id) }}">View</a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+          <span class="emoji">🗂️</span>
+          <p>No complaints match this view yet.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

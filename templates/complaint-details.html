@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Complaint Details — CampusFix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="app-shell">
+  <div class="sidebar-overlay"></div>
+
+  <aside class="sidebar">
+    <a href="{{ url_for('home') }}" class="logo"><span class="logo-mark">CF</span> CampusFix</a>
+    <nav class="side-nav">
+      <a href="{{ url_for('student_dashboard') }}" class="side-link"><span class="icon">🏠</span> Dashboard</a>
+      <a href="{{ url_for('report') }}" class="side-link"><span class="icon">📝</span> Report Problem</a>
+      <a href="{{ url_for('my_complaints') }}" class="side-link active"><span class="icon">📋</span> My Complaints</a>
+      <a href="{{ url_for('notifications') }}" class="side-link">
+        <span class="icon">🔔</span> Notifications
+        {% if unread_count > 0 %}<span class="notif-badge">{{ unread_count }}</span>{% endif %}
+      </a>
+      <a href="{{ url_for('profile') }}" class="side-link"><span class="icon">👤</span> Profile</a>
+      <div class="side-divider"></div>
+      <a href="{{ url_for('logout') }}" class="side-link"><span class="icon">🚪</span> Logout</a>
+    </nav>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="hamburger" aria-label="Open menu">☰</button>
+        <h1>Complaint Details</h1>
+      </div>
+      <div class="topbar-right">
+        <a href="{{ url_for('profile') }}" class="topbar-profile">
+          <div class="avatar">{{ user.initials }}</div>
+          <div><div class="name">{{ user.full_name }}</div><div class="role">Student</div></div>
+        </a>
+      </div>
+    </header>
+
+    <div class="page-body">
+      {% include "_flash.html" %}
+
+      <a href="{{ url_for('my_complaints') }}" class="btn btn-ghost btn-sm" style="margin-bottom: var(--space-5)">← Back to Complaints</a>
+
+      <div class="detail-grid">
+        <!-- LEFT: complaint info -->
+        <div>
+          <div class="panel" style="margin-bottom: var(--space-5)">
+            <div class="panel-head">
+              <div>
+                <span class="cell-sub">{{ complaint.complaint_id }}</span>
+                <h3 style="margin-top:4px">{{ complaint.title }}</h3>
+              </div>
+              <span class="badge badge-{{ status_badge_class(complaint.status) }}">{{ complaint.status }}</span>
+            </div>
+
+            <div class="detail-meta-grid">
+              <div class="meta-item"><span>Category</span><strong>{{ complaint.category }}</strong></div>
+              <div class="meta-item"><span>Location</span><strong>{{ complaint.location }}</strong></div>
+              <div class="meta-item"><span>Priority</span><strong><span class="badge badge-{{ priority_badge_class(complaint.priority) }}">{{ complaint.priority }}</span></strong></div>
+              <div class="meta-item"><span>Room</span><strong>{{ complaint.room_number or '—' }}</strong></div>
+              <div class="meta-item"><span>Department</span><strong>{{ complaint.department.name if complaint.department else 'Not yet assigned' }}</strong></div>
+              <div class="meta-item"><span>Date Submitted</span><strong>{{ complaint.created_at.strftime('%d %b %Y') }}</strong></div>
+              <div class="meta-item"><span>Last Updated</span><strong>{{ complaint.updated_at.strftime('%d %b %Y') }}</strong></div>
+              <div class="meta-item"><span>Contact Preference</span><strong>{{ complaint.contact_pref }}</strong></div>
+            </div>
+
+            <h4 style="font-size:0.95rem">Description</h4>
+            <p>{{ complaint.description }}</p>
+
+            {% if complaint.image_path %}
+            <h4 style="font-size:0.95rem">Attached Photo</h4>
+            <img src="{{ url_for('static', filename=complaint.image_path) }}" alt="Complaint photo" style="max-width: 100%; border-radius: var(--radius-md); border: 1px solid var(--color-border);">
+            {% endif %}
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><h3>Updates &amp; Comments</h3></div>
+            {% if updates|length > 1 %}
+              {% for u in updates[1:]|reverse %}
+              <div class="comment-item">
+                <div class="avatar sm">{{ 'AD' if u.user.role == 'admin' else u.user.initials }}</div>
+                <div class="comment-bubble">
+                  <div class="comment-head"><strong>{{ 'Admin' if u.user.role == 'admin' else u.user.full_name }}</strong><time>{{ u.created_at.strftime('%d %b, %I:%M %p') }}</time></div>
+                  <p>{{ u.comment }}</p>
+                </div>
+              </div>
+              {% endfor %}
+            {% else %}
+              <p class="text-muted" style="margin:0">No updates yet. You'll see admin responses here.</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- RIGHT: timeline -->
+        <div class="panel">
+          <div class="panel-head"><h3>Status Timeline</h3></div>
+          <div class="timeline">
+            {% for u in updates %}
+            <div class="timeline-item {{ 'current' if loop.last else 'done' }}">
+              <div class="timeline-dot">{{ '' if loop.last else '✓' }}</div>
+              <h5>{{ u.status }}</h5>
+              <time>{{ u.created_at.strftime('%d %b, %I:%M %p') }}</time>
+              {% if u.comment %}<p>{{ u.comment }}</p>{% endif %}
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

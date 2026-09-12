@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CampusFix — Fix Campus Problems, Faster</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<!-- ============ NAVBAR ============ -->
+<header class="navbar">
+  <div class="container">
+    <a href="{{ url_for('home') }}" class="logo"><span class="logo-mark">CF</span> CampusFix</a>
+    <nav class="nav-links">
+      <a href="{{ url_for('home') }}">Home</a>
+      <a href="#how-it-works">How It Works</a>
+      <a href="#features">Features</a>
+      <a href="#about">About</a>
+    </nav>
+    <div class="nav-actions">
+      <a href="{{ url_for('login') }}" class="btn btn-ghost">Login</a>
+      <a href="{{ url_for('register') }}" class="btn btn-primary">Register</a>
+    </div>
+    <button class="nav-toggle" aria-label="Toggle menu"><span></span></button>
+  </div>
+</header>
+
+<div class="container">{% include "_flash.html" %}</div>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-content">
+      <span class="eyebrow">Built for college campuses</span>
+      <h1>Fix Campus Problems. <span>Faster.</span></h1>
+      <p>CampusFix makes it simple for students to report campus issues and helps administrators resolve them efficiently.</p>
+      <div class="hero-actions">
+        <a href="{{ url_for('report') }}" class="btn btn-primary">Report a Problem</a>
+        <a href="{{ url_for('register') }}" class="btn btn-outline">Get Started</a>
+      </div>
+      <div class="hero-trust">
+        <div>{{ total_complaints }} <span>Complaints Reported</span></div>
+        <div>{{ resolved_complaints }} <span>Issues Resolved</span></div>
+        <div>{{ resolution_rate }}% <span>Resolution Rate</span></div>
+      </div>
+    </div>
+
+    <!-- CSS-only illustration: no external images used -->
+    <div class="hero-visual">
+      <div class="hv-orbit"></div>
+      <div class="hv-card hv-card-1">
+        <span class="hv-tag pending">Pending</span>
+        <div class="hv-title">Wi-Fi down — Block C</div>
+        <div class="hv-bar"><span style="width:20%"></span></div>
+      </div>
+      <div class="hv-card hv-card-2">
+        <span class="hv-tag progress">In Progress</span>
+        <div class="hv-title">AC repair — Room 108</div>
+        <div class="hv-bar"><span style="width:60%"></span></div>
+      </div>
+      <div class="hv-card hv-card-3">
+        <span class="hv-tag resolved">Resolved</span>
+        <div class="hv-title">Broken chair — Library</div>
+        <div class="hv-bar"><span style="width:100%"></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PROBLEM CATEGORIES ============ -->
+<section class="section" id="categories">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">What you can report</span>
+      <h2>Every kind of campus issue, in one place</h2>
+      <p>From a flickering tube light to a broken lab machine — CampusFix covers it all.</p>
+    </div>
+    <div class="grid grid-4">
+      <div class="card cat-card"><div class="cat-icon">📶</div><h4>Internet &amp; Wi-Fi</h4><p>Connectivity issues across hostels and academic blocks.</p></div>
+      <div class="card cat-card"><div class="cat-icon">⚡</div><h4>Electricity</h4><p>Power outages, faulty switches and wiring problems.</p></div>
+      <div class="card cat-card"><div class="cat-icon">💧</div><h4>Water</h4><p>Water supply, coolers, and plumbing complaints.</p></div>
+      <div class="card cat-card"><div class="cat-icon">🏫</div><h4>Classroom</h4><p>Projectors, boards, lighting, and seating issues.</p></div>
+      <div class="card cat-card"><div class="cat-icon">🔬</div><h4>Laboratory</h4><p>Equipment faults and lab maintenance requests.</p></div>
+      <div class="card cat-card"><div class="cat-icon">🧹</div><h4>Cleanliness</h4><p>Washrooms, corridors, and common area hygiene.</p></div>
+      <div class="card cat-card"><div class="cat-icon">🪑</div><h4>Furniture</h4><p>Broken desks, chairs, cabinets and fixtures.</p></div>
+      <div class="card cat-card"><div class="cat-icon">📋</div><h4>Other</h4><p>Anything else affecting your campus experience.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="section" id="how-it-works" style="background:var(--color-surface-alt)">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Simple process</span>
+      <h2>How CampusFix works</h2>
+      <p>A clear, trackable path from problem to resolution.</p>
+    </div>
+    <div class="steps-row">
+      <div class="step"><div class="step-number">1</div><h4>Report</h4><p>Submit an issue in under a minute.</p></div>
+      <div class="step-arrow">→</div>
+      <div class="step"><div class="step-number">2</div><h4>Prioritize</h4><p>Admins review and assign urgency.</p></div>
+      <div class="step-arrow">→</div>
+      <div class="step"><div class="step-number">3</div><h4>Resolve</h4><p>The right department fixes the issue.</p></div>
+      <div class="step-arrow">→</div>
+      <div class="step"><div class="step-number">4</div><h4>Track</h4><p>Follow progress until it's closed.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEATURES ============ -->
+<section class="section" id="features">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Why CampusFix</span>
+      <h2>Everything a campus needs to stay on top of issues</h2>
+    </div>
+    <div class="grid grid-3">
+      <div class="card feature-card"><div class="feature-icon">📝</div><h4>Easy Complaint Reporting</h4><p>A guided form captures every detail admins need to act fast.</p></div>
+      <div class="card feature-card"><div class="feature-icon">📍</div><h4>Complaint Tracking</h4><p>Students follow their complaint from submission to resolution.</p></div>
+      <div class="card feature-card"><div class="feature-icon">🚦</div><h4>Smart Priority</h4><p>Issues are triaged by urgency so critical problems get seen first.</p></div>
+      <div class="card feature-card"><div class="feature-icon">🗂️</div><h4>Admin Dashboard</h4><p>A single control center to manage every open complaint.</p></div>
+      <div class="card feature-card"><div class="feature-icon">🔔</div><h4>Status Updates</h4><p>Automatic notifications keep everyone in the loop.</p></div>
+      <div class="card feature-card"><div class="feature-icon">📊</div><h4>Campus Analytics</h4><p>Spot recurring problems by category and location.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ STATISTICS ============ -->
+<section class="section" id="about">
+  <div class="container">
+    <div class="stats-band">
+      <div class="grid grid-4">
+        <div><div class="stat-value">{{ total_complaints }}</div><div class="stat-label">Complaints Reported</div></div>
+        <div><div class="stat-value">{{ resolved_complaints }}</div><div class="stat-label">Issues Resolved</div></div>
+        <div><div class="stat-value">{{ locations }}</div><div class="stat-label">Campus Locations</div></div>
+        <div><div class="stat-value">{{ resolution_rate }}%</div><div class="stat-label">Resolution Rate</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="{{ url_for('home') }}" class="logo"><span class="logo-mark">CF</span> CampusFix</a>
+        <p>Making campuses better, one problem at a time.</p>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <h5>Product</h5>
+          <a href="#features">Features</a>
+          <a href="#how-it-works">How It Works</a>
+          <a href="{{ url_for('report') }}">Report a Problem</a>
+        </div>
+        <div class="footer-col">
+          <h5>Account</h5>
+          <a href="{{ url_for('login') }}">Login</a>
+          <a href="{{ url_for('register') }}">Register</a>
+          <a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
+        </div>
+        <div class="footer-col">
+          <h5>About</h5>
+          <a href="#about">Our Mission</a>
+          <a href="#">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 CampusFix. Built by team DevForge</span>
+      <span>Powered by Flask + MySQL</span>
+    </div>
+  </div>
+</footer>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

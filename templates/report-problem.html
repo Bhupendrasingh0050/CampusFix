@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Report a Problem — CampusFix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="app-shell">
+  <div class="sidebar-overlay"></div>
+
+  <aside class="sidebar">
+    <a href="{{ url_for('home') }}" class="logo"><span class="logo-mark">CF</span> CampusFix</a>
+    <nav class="side-nav">
+      <a href="{{ url_for('student_dashboard') }}" class="side-link"><span class="icon">🏠</span> Dashboard</a>
+      <a href="{{ url_for('report') }}" class="side-link active"><span class="icon">📝</span> Report Problem</a>
+      <a href="{{ url_for('my_complaints') }}" class="side-link"><span class="icon">📋</span> My Complaints</a>
+      <a href="{{ url_for('notifications') }}" class="side-link">
+        <span class="icon">🔔</span> Notifications
+        {% if unread_count > 0 %}<span class="notif-badge">{{ unread_count }}</span>{% endif %}
+      </a>
+      <a href="{{ url_for('profile') }}" class="side-link"><span class="icon">👤</span> Profile</a>
+      <div class="side-divider"></div>
+      <a href="{{ url_for('logout') }}" class="side-link"><span class="icon">🚪</span> Logout</a>
+    </nav>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="hamburger" aria-label="Open menu">☰</button>
+        <h1>Report a Problem</h1>
+      </div>
+      <div class="topbar-right">
+        <a href="{{ url_for('profile') }}" class="topbar-profile">
+          <div class="avatar">{{ user.initials }}</div>
+          <div><div class="name">{{ user.full_name }}</div><div class="role">Student</div></div>
+        </a>
+      </div>
+    </header>
+
+    <div class="page-body">
+      {% include "_flash.html" %}
+
+      <div class="panel" style="max-width: 760px; margin: 0 auto;">
+        <div class="info-box">
+          ℹ️ Please provide accurate information so the issue can be resolved faster.
+        </div>
+
+        <form id="report-problem-form" method="POST" action="{{ url_for('report') }}" data-validate novalidate enctype="multipart/form-data">
+          <div class="form-group">
+            <label for="problem-title">Problem Title</label>
+            <input type="text" id="problem-title" name="title" placeholder="e.g. Wi-Fi not working in Block C" required>
+            <span class="field-error">Please enter a short title for the problem.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="problem-description">Problem Description</label>
+            <textarea id="problem-description" name="description" placeholder="Describe the issue in detail — what happened, since when, and how it affects you." required></textarea>
+            <span class="field-error">Please describe the problem.</span>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="category">Category</label>
+              <select id="category" name="category" required>
+                <option value="">Select category</option>
+                {% for cat in ["Internet/Wi-Fi", "Electricity", "Water", "Classroom", "Laboratory", "Furniture", "Cleanliness", "Other"] %}
+                <option value="{{ cat }}">{{ cat }}</option>
+                {% endfor %}
+              </select>
+              <span class="field-error">Please select a category.</span>
+            </div>
+            <div class="form-group">
+              <label for="location">Location / Building</label>
+              <input type="text" id="location" name="location" placeholder="e.g. Block C" required>
+              <span class="field-error">Please enter the location.</span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="room-number">Room Number <span class="optional">(optional)</span></label>
+              <input type="text" id="room-number" name="room_number" placeholder="e.g. 214">
+            </div>
+            <div class="form-group">
+              <label for="department">Department <span class="optional">(optional)</span></label>
+              <select id="department" name="department_id">
+                <option value="">Not sure / let admin decide</option>
+                {% for dept in departments %}
+                <option value="{{ dept.id }}">{{ dept.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Priority / Urgency</label>
+            <div class="priority-selector">
+              <label class="priority-option" data-level="low">
+                <input type="radio" name="priority" value="Low"><span class="dot"></span><span>Low</span>
+              </label>
+              <label class="priority-option selected" data-level="medium">
+                <input type="radio" name="priority" value="Medium" checked><span class="dot"></span><span>Medium</span>
+              </label>
+              <label class="priority-option" data-level="high">
+                <input type="radio" name="priority" value="High"><span class="dot"></span><span>High</span>
+              </label>
+              <label class="priority-option" data-level="critical">
+                <input type="radio" name="priority" value="Critical"><span class="dot"></span><span>Critical</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Attach a Photo <span class="optional">(optional)</span></label>
+            <div class="upload-box">
+              <div class="upload-icon" style="font-size:1.8rem">📷</div>
+              <p style="margin:0">Click to upload an image of the problem</p>
+              <span class="helper-text">PNG, JPG, JPEG or WEBP, up to 5MB</span>
+            </div>
+            <input type="file" id="problem-image" name="image" accept=".png,.jpg,.jpeg,.webp" style="display:none">
+            <div class="file-preview" style="display:none"></div>
+          </div>
+
+          <div class="form-group">
+            <label>Contact Preference</label>
+            <div class="contact-pref-row">
+              <label><input type="radio" name="contact_pref" value="Email" checked> Email</label>
+              <label><input type="radio" name="contact_pref" value="App"> In-app notification</label>
+              <label><input type="radio" name="contact_pref" value="Both"> Both</label>
+            </div>
+          </div>
+
+          <div style="display:flex; gap: var(--space-3); margin-top: var(--space-6)">
+            <button type="submit" class="btn btn-primary">Submit Complaint</button>
+            <a href="{{ url_for('student_dashboard') }}" class="btn btn-outline">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

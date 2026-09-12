@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Complaint Details — CampusFix Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"></head>
+<body>
+
+<div class="app-shell">
+  <div class="sidebar-overlay"></div>
+
+  <aside class="sidebar">
+    <a href="{{ url_for('home') }}" class="logo"><span class="logo-mark">CF</span> CampusFix</a>
+    <nav class="side-nav">
+      <a href="{{ url_for('admin_dashboard') }}" class="side-link"><span class="icon">🏠</span> Dashboard</a>
+      <a href="{{ url_for('admin_complaints') }}" class="side-link active"><span class="icon">📋</span> All Complaints</a>
+      <a href="{{ url_for('admin_complaints', status='pending') }}" class="side-link"><span class="icon">⏳</span> Pending</a>
+      <a href="{{ url_for('admin_complaints', status='in-progress') }}" class="side-link"><span class="icon">🔧</span> In Progress</a>
+      <a href="{{ url_for('admin_complaints', status='resolved') }}" class="side-link"><span class="icon">✅</span> Resolved</a>
+      <div class="side-divider"></div>
+      <a href="{{ url_for('logout') }}" class="side-link"><span class="icon">🚪</span> Logout</a>
+    </nav>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="hamburger" aria-label="Open menu">☰</button>
+        <h1>Complaint Details</h1>
+      </div>
+      <div class="topbar-right">
+        <a href="{{ url_for('profile') }}" class="topbar-profile">
+          <div class="avatar">{{ user.initials }}</div>
+          <div><div class="name">{{ user.full_name }}</div><div class="role">Campus Admin</div></div>
+        </a>
+      </div>
+    </header>
+
+    <div class="page-body">
+      {% include "_flash.html" %}
+
+      <a href="{{ url_for('admin_complaints') }}" class="btn btn-ghost btn-sm" style="margin-bottom: var(--space-5)">← Back to Complaints</a>
+
+      <div class="detail-grid">
+        <!-- LEFT: complaint + student info + timeline -->
+        <div>
+          <div class="panel" style="margin-bottom: var(--space-5)">
+            <div class="panel-head">
+              <div>
+                <span class="cell-sub">{{ complaint.complaint_id }}</span>
+                <h3 style="margin-top:4px">{{ complaint.title }}</h3>
+              </div>
+              <span class="badge badge-{{ status_badge_class(complaint.status) }}">{{ complaint.status }}</span>
+            </div>
+
+            <div class="detail-meta-grid">
+              <div class="meta-item"><span>Student</span><strong>{{ complaint.user.full_name }}</strong></div>
+              <div class="meta-item"><span>Student ID</span><strong>{{ complaint.user.student_id or 'N/A' }}</strong></div>
+              <div class="meta-item"><span>Branch / Year</span><strong>{{ complaint.user.branch }}, {{ complaint.user.year }}</strong></div>
+              <div class="meta-item"><span>Category</span><strong>{{ complaint.category }}</strong></div>
+              <div class="meta-item"><span>Location</span><strong>{{ complaint.location }}{% if complaint.room_number %}, Room {{ complaint.room_number }}{% endif %}</strong></div>
+              <div class="meta-item"><span>Submitted</span><strong>{{ complaint.created_at.strftime('%d %b %Y') }}</strong></div>
+            </div>
+
+            <h4 style="font-size:0.95rem">Description</h4>
+            <p>{{ complaint.description }}</p>
+
+            {% if complaint.image_path %}
+            <h4 style="font-size:0.95rem">Attached Photo</h4>
+            <img src="{{ url_for('static', filename=complaint.image_path) }}" alt="Complaint photo" style="max-width: 100%; border-radius: var(--radius-md); border: 1px solid var(--color-border);">
+            {% endif %}
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><h3>Activity Timeline</h3></div>
+            <div class="timeline">
+              {% for u in updates %}
+              <div class="timeline-item {{ 'current' if loop.last else 'done' }}">
+                <div class="timeline-dot">{{ '' if loop.last else '✓' }}</div>
+                <h5>{{ u.status }}{% if u.user.role == 'admin' %} · by {{ u.user.full_name }}{% endif %}</h5>
+                <time>{{ u.created_at.strftime('%d %b, %I:%M %p') }}</time>
+                {% if u.comment %}<p>{{ u.comment }}</p>{% endif %}
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: admin controls -->
+        <div class="panel" id="status">
+          <div class="panel-head"><h3>Admin Controls</h3></div>
+
+          <form method="POST" action="{{ url_for('update_complaint', complaint_id=complaint.id) }}">
+            <div class="control-group">
+              <label>Status</label>
+              <div class="pill-select" data-pill-group="status">
+                {% for s in ["Pending", "In Progress", "Resolved", "Rejected"] %}
+                <button type="button" data-value="{{ s }}" class="{{ 'active' if complaint.status == s }}">{{ s }}</button>
+                {% endfor %}
+              </div>
+              <input type="hidden" name="status" id="status-input" value="{{ complaint.status }}">
+            </div>
+
+            <div class="control-group">
+              <label>Priority</label>
+              <div class="pill-select" data-pill-group="priority">
+                {% for p in ["Low", "Medium", "High", "Critical"] %}
+                <button type="button" data-value="{{ p }}" class="{{ 'active' if complaint.priority == p }}">{{ p }}</button>
+                {% endfor %}
+              </div>
+              <input type="hidden" name="priority" id="priority-input" value="{{ complaint.priority }}">
+            </div>
+
+            <div class="control-group" id="assign">
+              <label for="department">Assign Department</label>
+              <select id="department" name="department_id">
+                <option value="">Unassigned</option>
+                {% for dept in departments %}
+                <option value="{{ dept.id }}" {{ 'selected' if complaint.department_id == dept.id }}>{{ dept.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="control-group">
+              <label for="comment">Comment <span class="optional">(visible to student)</span></label>
+              <textarea id="comment" name="comment" placeholder="Add an update the student will see on their timeline..."></textarea>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap: var(--space-3)">
+              <button type="submit" class="btn btn-primary btn-block">Update Complaint</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

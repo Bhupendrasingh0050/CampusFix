@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Account — CampusFix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="auth-wrap">
+  <div class="auth-side">
+    <a href="{{ url_for('home') }}" class="logo"><span class="logo-mark">CF</span> CampusFix</a>
+    <blockquote>
+      "Set up your account to register your complaints and get it resolved"
+      <cite>Your problems our priority</cite>
+    </blockquote>
+  </div>
+
+  <div class="auth-form-side">
+    <div class="auth-box">
+      <h2>Create your account</h2>
+      <p class="text-muted">Join CampusFix to report and track campus issues.</p>
+
+      {% include "_flash.html" %}
+
+      <form id="register-form" method="POST" action="{{ url_for('register') }}" data-validate novalidate>
+        <div class="form-group">
+          <label for="fullname">Full Name</label>
+          <input type="text" id="fullname" name="full_name" placeholder="e.g. Aarav Mehta" required>
+          <span class="field-error">Please enter your full name.</span>
+        </div>
+
+        <div class="form-group">
+          <label for="reg-email">College Email</label>
+          <input type="email" id="reg-email" name="email" placeholder="you@college.edu" required>
+          <span class="field-error">Please enter a valid college email.</span>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="branch">Branch</label>
+            <select id="branch" name="branch" required>
+              <option value="">Select branch</option>
+              <option>CSE (AI)</option>
+              <option>CSE</option>
+              <option>ECE</option>
+              <option>Mechanical</option>
+              <option>Civil</option>
+              <option>Other</option>
+            </select>
+            <span class="field-error">Please select your branch.</span>
+          </div>
+          <div class="form-group">
+            <label for="year">Year</label>
+            <select id="year" name="year" required>
+              <option value="">Select year</option>
+              <option>1st Year</option>
+              <option>2nd Year</option>
+              <option>3rd Year</option>
+              <option>4th Year</option>
+            </select>
+            <span class="field-error">Please select your year.</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="student-id">Student ID</label>
+          <input type="text" id="student-id" name="student_id" placeholder="e.g. 2026CSEAI045" required>
+          <span class="field-error">Please enter your student ID.</span>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="password">Password</label>
+            <div class="password-field">
+              <input type="password" id="password" name="password" placeholder="Create a password (min. 6 characters)" minlength="6" required>
+              <button type="button" class="password-toggle">Show</button>
+            </div>
+            <span class="field-error">Password must be at least 6 characters.</span>
+          </div>
+          <div class="form-group">
+            <label for="confirm-password">Confirm Password</label>
+            <div class="password-field">
+              <input type="password" id="confirm-password" name="confirm_password" placeholder="Re-enter password" required>
+              <button type="button" class="password-toggle">Show</button>
+            </div>
+            <span class="field-error">Passwords must match.</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-row"><input type="checkbox" name="terms" required> I agree to the Terms of Service and Privacy Policy</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+      </form>
+
+      <p class="auth-footer-link">Already have an account? <a href="{{ url_for('login') }}">Login</a></p>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

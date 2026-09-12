@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notifications — CampusFix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="app-shell">
+  <div class="sidebar-overlay"></div>
+
+  <aside class="sidebar">
+    <a href="{{ url_for('home') }}" class="logo"><span class="logo-mark">CF</span> CampusFix</a>
+    <nav class="side-nav">
+      <a href="{{ url_for('student_dashboard') }}" class="side-link"><span class="icon">🏠</span> Dashboard</a>
+      <a href="{{ url_for('report') }}" class="side-link"><span class="icon">📝</span> Report Problem</a>
+      <a href="{{ url_for('my_complaints') }}" class="side-link"><span class="icon">📋</span> My Complaints</a>
+      <a href="{{ url_for('notifications') }}" class="side-link active">
+        <span class="icon">🔔</span> Notifications
+        {% if unread_count > 0 %}<span class="notif-badge">{{ unread_count }}</span>{% endif %}
+      </a>
+      <a href="{{ url_for('profile') }}" class="side-link"><span class="icon">👤</span> Profile</a>
+      <div class="side-divider"></div>
+      <a href="{{ url_for('logout') }}" class="side-link"><span class="icon">🚪</span> Logout</a>
+    </nav>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="hamburger" aria-label="Open menu">☰</button>
+        <h1>Notifications</h1>
+      </div>
+      <div class="topbar-right">
+        <a href="{{ url_for('profile') }}" class="topbar-profile">
+          <div class="avatar">{{ user.initials }}</div>
+          <div><div class="name">{{ user.full_name }}</div><div class="role">Student</div></div>
+        </a>
+      </div>
+    </header>
+
+    <div class="page-body">
+      {% include "_flash.html" %}
+
+      <div class="panel" style="max-width: 760px; margin: 0 auto;">
+        <div class="panel-head"><h3>Notifications</h3></div>
+
+        {% if notifications %}
+          {% for n in notifications %}
+          <div class="notif-item {{ 'unread' if not n.is_read else 'read' }}">
+            <div class="notif-dot"></div>
+            <div class="notif-content">
+              <p>{{ n.message }}</p>
+              <time>{{ n.created_at.strftime('%d %b %Y, %I:%M %p') }}</time>
+              {% if n.complaint_id %}
+              &nbsp;·&nbsp;<a href="{{ url_for('complaint_details', complaint_id=n.complaint_id) }}">View complaint</a>
+              {% endif %}
+            </div>
+            {% if not n.is_read %}
+            <form class="notif-mark-form" method="POST" action="{{ url_for('mark_notification_read', notification_id=n.id) }}">
+              <button type="submit">Mark as read</button>
+            </form>
+            {% endif %}
+          </div>
+          {% endfor %}
+        {% else %}
+        <div class="empty-state">
+          <span class="emoji">🔔</span>
+          <p>You have no notifications yet.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
